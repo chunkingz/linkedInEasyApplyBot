@@ -87,19 +87,21 @@ async function jobCriteriaByTime() {
     "ul.search-reusables__filter-list>li:nth-child(4)>div>span>button"
   );
   if (periodOfTime == "Past 24 hours") {
+    // apply to the jobs posted in the last 24 hrs
     await page.waitForTimeout(2000);
     await buttonClick(
       "form > fieldset > div.pl4.pr6 > ul > li:nth-child(4) > label"
     );
     await page.waitForTimeout(2000);
-    await buttonClick(".render-mode-BIGPIPE");
+    await buttonClick("form > fieldset > div + hr + div > button + button");
   } else {
+    // apply to the jobs posted within the past week
     await page.waitForTimeout(2000);
     await buttonClick(
       "form > fieldset > div.pl4.pr6 > ul > li:nth-child(3) > label"
     );
     await page.waitForTimeout(2000);
-    await buttonClick(".render-mode-BIGPIPE");
+    await buttonClick("form > fieldset > div + hr + div > button + button");
   }
 }
 
