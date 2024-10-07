@@ -17,7 +17,7 @@ cd linkedInEasyApplyBot && npm i
 touch .env
 ```
 
-## Add your Linkedin credentials
+## Add your Linkedin credentials to the env file
 ```shell
 EMAIL=your_email@example.com
 PASSWORD=your_password
