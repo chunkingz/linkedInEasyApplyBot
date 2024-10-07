@@ -9,7 +9,7 @@ git clone git@github.com:chunkingz/linkedInEasyApplyBot.git`
 
 ## Initialize the app
 ```shell
-npm i
+cd linkedInEasyApplyBot && npm i
 ```
 
 ## Add .env
