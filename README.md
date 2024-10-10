@@ -1,4 +1,4 @@
-# linkedIn Bot for Easy Apply 
+# LinkedIn Bot for Easy Apply 
 
 Bot used for LinkedIn easy apply
 
