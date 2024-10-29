@@ -4,7 +4,7 @@ const fs = require("fs");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const data = require("./config.json");
 
-const {EMAIL: email, PASSWORD: password} = process.env;
+const { EMAIL: email, PASSWORD: password } = process.env;
 
 const {
   baseURL,
@@ -229,7 +229,25 @@ async function FillAndApply() {
           continue; // Skip this job and continue to the next one
         }
         console.log("Applying....");
+
+        // Click the "Easy Apply" button
         await clickElement("[class*=jobs-apply-button]>button");
+
+        // Check to see if the "Job search safety reminder" dialog comes up instead
+        await page.waitForTimeout(2000);
+        await page.evaluate(() => {
+          setTimeout(() => {}, 3000);
+          const continueApplyingButton = document.querySelector(
+            'div[class="artdeco-modal__actionbar ember-view job-trust-pre-apply-safety-tips-modal__footer"]>button+div>div>button'
+          );
+          if (continueApplyingButton != null) {
+            console.log("Job search safety reminder dialog found");
+            continueApplyingButton.click(); // Click the "Continue applying" button in the "Job search safety reminder" dialog
+          } else {
+            console.log("Continue as expected");
+          }
+        });
+
         while (state == true) {
           await page.waitForTimeout(2000);
           if (
@@ -239,7 +257,7 @@ async function FillAndApply() {
                 .querySelector(
                   'div[class="display-flex justify-flex-end ph5 pv4"]>button'
                 )
-                .click();
+                .click(); // Click the "Next" button in the Apply dialog
             })
           ) {
             state = true;
