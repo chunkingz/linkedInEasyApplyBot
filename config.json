@@ -1,12 +1,13 @@
 {
     "browserPath": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "keyword": [
-        "\"fullstack developer\"",
-        "\"full stack developer\"",
-        "\"javascript developer\"",
-        "\"nodejs developer\"",
-        "\"java developer\""
-    ],
+"keyword": [
+  "\"Full Stack Engineer\"",
+  "\"fullstack developer\"",
+  "\"full stack developer\"",
+  "\"javascript developer\"",
+  "\"nodejs developer\"",
+  "\"java developer\""
+],
     "location": "United States",
     "periodOfTime": "Past 24 hours",
     "AvgExperience": 2,
@@ -14,5 +15,16 @@
     "baseURL": "https://www.linkedin.com/login",
     "numberOfPagination": 14,
     "numberOfOffersPerPage": 25,
-    "avoidJobTitles": ["PRINCIPAL","STAFF","MANAGER","ANGULAR",".NET","C#", "SHAREPOINT", "SHARE POINT", "LEAD", "ARCHITECT", "CLEARANCE", "USC","GC","SECRET","TOP","NET","LOCAL","CITIZEN"]
+    "avoidJobTitles": [
+        "Test", 
+        "PYTHON",
+        "PRINCIPAL",
+        "STAFF",
+        "MANAGER",
+        "ANGULAR",".NET","C#", 
+        "SHAREPOINT", "SHARE POINT", 
+        "LEAD", "ARCHITECT", "CLEARANCE", 
+        "USC","GC","SECRET","TOP","NET",
+        "LOCAL","CITIZEN"
+    ]
 }
