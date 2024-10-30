@@ -223,12 +223,15 @@ async function FillAndApply() {
         console.log("jobLink: " + jobLink);
 
         // Check if the job title is in the list of titles to avoid
-        if (avoidJobTitles.includes(jobTitle)) {
+        const jobTitleRegex = new RegExp(
+          `\\b(${avoidJobTitles.join("|")})\\b`,
+          "i"
+        );
+        if (jobTitleRegex.test(jobTitle)) {
           console.log(`Skipping job with title: ${jobTitle}`);
-          // await Scrolling();
           continue; // Skip this job and continue to the next one
         }
-        console.log("Applying....");
+        console.log(`Applying to ${jobTitle} ...`);
 
         // Click the "Easy Apply" button
         await clickElement("[class*=jobs-apply-button]>button");
@@ -241,10 +244,7 @@ async function FillAndApply() {
             'div[class="artdeco-modal__actionbar ember-view job-trust-pre-apply-safety-tips-modal__footer"]>button+div>div>button'
           );
           if (continueApplyingButton != null) {
-            console.log("Job search safety reminder dialog found");
             continueApplyingButton.click(); // Click the "Continue applying" button in the "Job search safety reminder" dialog
-          } else {
-            console.log("Continue as expected");
           }
         });
 
