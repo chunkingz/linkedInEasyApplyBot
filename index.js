@@ -9,6 +9,7 @@ const { EMAIL: email, PASSWORD: password } = process.env;
 const {
   baseURL,
   keyword,
+  workPlaceTypes,
   location,
   AvgExperience,
   periodOfTime,
@@ -106,13 +107,19 @@ async function jobCriteriaByTime() {
 }
 
 async function jobCriteriaByType() {
-  // await buttonClick(
-  //   'div[id="hoverable-outlet-on-site/remote-filter-value"]+span>button'
-  // );
+  await buttonClick(
+    ".search-reusables__filter-list>li:nth-child(8)>div"
+  );
   await page.waitForTimeout(2000);
-  await buttonClick("label[for^='workplaceType']");
+
+  await buttonClick(workPlaceTypes.remote);
+  await buttonClick(workPlaceTypes.hybrid);
+  await buttonClick(workPlaceTypes.onsite);
+
   await page.waitForTimeout(2000);
-  await buttonClick(".render-mode-BIGPIPE");
+  await buttonClick(
+    ".search-reusables__filter-list>li:nth-child(8)>div>div>div>div>div>form>fieldset>div+hr+div>button+button"
+  ); // click the `show results` button
   await page.waitForTimeout(2000);
 }
 
@@ -371,6 +378,8 @@ async function jobsApply() {
   await page.waitForTimeout(2000);
   await page.keyboard.press("Enter");
   await jobCriteriaByTime();
+  await page.waitForTimeout(4000);
+  await jobCriteriaByType();
   await page.waitForTimeout(4000);
   await FillAndApply();
 }
