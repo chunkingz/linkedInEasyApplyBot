@@ -8,6 +8,11 @@
     "\"nodejs developer\"",
     "\"java developer\""
   ],
+  "workPlaceTypes": {
+    "onsite": "#workplaceType-1",
+    "remote": "#workplaceType-2",
+    "hybrid": "#workplaceType-3"
+  },
   "location": "United States",
   "periodOfTime": "Past 24 hours",
   "AvgExperience": 2,

@@ -5,7 +5,7 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node index.js",
         "dev": "nodemon index.js",
-        "bump": "npm version patch --no-git-tag-version"
+        "bump": "npm version patch"
     },
     "dependencies": {
         "csv-writer": "^1.6.0",
