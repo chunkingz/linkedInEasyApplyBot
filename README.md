@@ -4,7 +4,7 @@ Bot used for LinkedIn easy apply
 
 ## Clone the repo
 ```shell
-git clone git@github.com:chunkingz/linkedInEasyApplyBot.git`
+git clone git@github.com:chunkingz/linkedInEasyApplyBot.git
 ```
 
 ## Initialize the app
