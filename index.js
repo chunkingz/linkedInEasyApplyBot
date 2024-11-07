@@ -231,7 +231,7 @@ async function FillAndApply() {
 
         // Check if the job title is in the list of titles to avoid
         const jobTitleRegex = new RegExp(
-          `\\b(${avoidJobTitles.join("|")})\\b`,
+          `\\b(${avoidJobTitles.map((title) => title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join("|")})(?=\\b|[^a-zA-Z0-9])`,
           "i"
         );
         if (jobTitleRegex.test(jobTitle)) {
@@ -324,7 +324,7 @@ async function FillAndApply() {
                   .click();
               });
             } else counter = -2;
-          } while (counter >= 0 && counter < 5);
+          } while (counter >= 0 && counter < 20);
 
           let skipped = false;
           if (counter >= 5) {

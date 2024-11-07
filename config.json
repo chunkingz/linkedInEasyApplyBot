@@ -1,12 +1,14 @@
 {
   "browserPath": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   "keyword": [
+    "\"Software Engineer\"",
     "\"Full Stack Engineer\"",
     "\"fullstack developer\"",
     "\"full stack developer\"",
     "\"javascript developer\"",
     "\"nodejs developer\"",
-    "\"java developer\""
+    "\"Java Developer\"",
+    "\"Java Engineer\""
   ],
   "workPlaceTypes": {
     "onsite": "#workplaceType-1",
@@ -21,7 +23,8 @@
   "numberOfPagination": 14,
   "numberOfOffersPerPage": 25,
   "avoidJobTitles": [
-    "Test",
+    "TEST",
+    "EMBEDDED",
     "PYTHON",
     "PRINCIPAL",
     "STAFF",
@@ -29,6 +32,7 @@
     "ANGULAR",
     ".NET",
     "C#",
+    "C++",
     "SHAREPOINT",
     "SHARE POINT",
     "LEAD",
