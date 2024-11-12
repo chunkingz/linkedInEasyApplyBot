@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { exit } = require("process");
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
@@ -107,9 +108,7 @@ async function jobCriteriaByTime() {
 }
 
 async function jobCriteriaByType() {
-  await buttonClick(
-    ".search-reusables__filter-list>li:nth-child(8)>div"
-  );
+  await buttonClick(".search-reusables__filter-list>li:nth-child(8)>div");
   await page.waitForTimeout(2000);
 
   await buttonClick(workPlaceTypes.remote);
@@ -231,7 +230,9 @@ async function FillAndApply() {
 
         // Check if the job title is in the list of titles to avoid
         const jobTitleRegex = new RegExp(
-          `\\b(${avoidJobTitles.map((title) => title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join("|")})(?=\\b|[^a-zA-Z0-9])`,
+          `\\b(${avoidJobTitles
+            .map((title) => title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+            .join("|")})(?=\\b|[^a-zA-Z0-9])`,
           "i"
         );
         if (jobTitleRegex.test(jobTitle)) {
@@ -241,30 +242,43 @@ async function FillAndApply() {
         console.log(`Applying to ${jobTitle} ...`);
 
         // Click the "Easy Apply" button
-        await clickElement("[class*=jobs-apply-button]>button");
+        await page.waitForTimeout(4000);
+        const easyApplyLimitReached = await page.evaluate(() => {
+          const easyApplyLimitTextIsVisible = document.querySelector(
+            'div[class*="mt3 artdeco-inline-feedback artdeco-inline-feedback--error ember-view"]'
+          );
+          if (easyApplyLimitTextIsVisible) return true;
+
+          const easyApplyButton = document.querySelector(
+            'div[class*="jobs-apply-button"]>button'
+          );
+          if (easyApplyButton) easyApplyButton.click();
+        });
+
+        if (easyApplyLimitReached) {
+          console.log(
+            "==========\nYou've reached the Easy Apply application limit for today. Exiting the app...\n=========="
+          );
+          exit(0);
+        }
 
         // Check to see if the "Job search safety reminder" dialog comes up instead
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(4000);
         await page.evaluate(() => {
-          setTimeout(() => {}, 3000);
           const continueApplyingButton = document.querySelector(
             'div[class="artdeco-modal__actionbar ember-view job-trust-pre-apply-safety-tips-modal__footer"]>button+div>div>button'
           );
-          if (continueApplyingButton != null) {
-            continueApplyingButton.click(); // Click the "Continue applying" button in the "Job search safety reminder" dialog
-          }
+          if (continueApplyingButton) continueApplyingButton.click(); // Click the "Continue applying" button in the "Job search safety reminder" dialog
         });
 
         while (state == true) {
-          await page.waitForTimeout(2000);
+          await page.waitForTimeout(4000);
           if (
             await page.evaluate(() => {
-              setTimeout(() => {}, 3000);
-              document
-                .querySelector(
-                  'div[class="display-flex justify-flex-end ph5 pv4"]>button'
-                )
-                .click(); // Click the "Next" button in the Apply dialog
+              const nextBtn = document.querySelector(
+                'div[class="display-flex justify-flex-end ph5 pv4"]>button'
+              );
+              if (nextBtn) nextBtn.click(); // Click the "Next" button in the Apply dialog
             })
           ) {
             state = true;
@@ -303,31 +317,34 @@ async function FillAndApply() {
             });
           }
           let counter = 0;
+          let finalPage = false;
           do {
             await page.waitForTimeout(4000);
-            if (
-              !(await page.$(
-                'div[class*="artdeco-modal-overlay"]>div>div+div+div>button>span'
-                // 'div[class*=artdeco-modal-overlay]>div>div+div>div>div+div>form>div+footer>div+div>button>span' // proposed change
-              ))
-            ) {
+            const modalExists = await page.$(
+              'div[class*="artdeco-modal-overlay"]>div>div+div>div>button>span'
+            );
+            if (!modalExists) {
               counter++;
               console.log("counter: " + counter);
-              await page.evaluate(() => {
-                setTimeout(() => {}, 3000);
-                document
-                  .querySelector(
-                    'div[class="display-flex justify-flex-end ph5 pv4"]>button + button'
-                    // 'div[class="display-flex justify-flex-end ph5 pv4"]>#ember380'
-                    // '.display-flex justify-flex-end ph5 pv4>#ember380'  // proposed change
-                  )
-                  .click();
+
+              finalPage = await page.evaluate(() => {
+                const nextButton = document.querySelector(
+                  'div[class="display-flex justify-flex-end ph5 pv4"]>button + button'
+                );
+                if (nextButton) {
+                  nextButton.click();
+                  return false;
+                } else {
+                  return true;
+                }
               });
             } else counter = -2;
-          } while (counter >= 0 && counter < 20);
+          } while (counter >= 0 && counter < 20 && finalPage === false);
 
           let skipped = false;
-          if (counter >= 5) {
+          if (counter >= 5 && finalPage === false) {
+            // due to inactivity, skip the job
+            await page.waitForTimeout(3000);
             await buttonClick(
               ".artdeco-modal__dismiss.artdeco-button.artdeco-button--circle.artdeco-button--muted.artdeco-button--2.artdeco-button--tertiary.ember-view"
             );
@@ -338,18 +355,17 @@ async function FillAndApply() {
             skipped = true;
             console.log("Job Skipped");
           } else {
+            // Finish the job application by closing the dialog with the `X` button.
             await page.waitForTimeout(4000);
             await page.evaluate(() => {
-              setTimeout(() => {}, 3000);
-              document
-                .querySelector(
-                  ".artdeco-modal__dismiss.artdeco-button.artdeco-button--circle.artdeco-button--muted.artdeco-button--2.artdeco-button--tertiary.ember-view"
-                )
-                .click();
+              const xBtn = document.querySelector(
+                ".artdeco-modal__dismiss.artdeco-button.artdeco-button--circle.artdeco-button--muted.artdeco-button--2.artdeco-button--tertiary.ember-view"
+              );
+              if (xBtn) xBtn.click();
             });
           }
 
-          //Write in csv
+          // Add the Job to the CSV file
           writeInCSV({
             jobTitle: jobTitle,
             link: "https://www.linkedin.com" + jobLink,
