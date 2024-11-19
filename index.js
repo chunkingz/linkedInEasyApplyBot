@@ -19,15 +19,18 @@ const {
   numberOfPagination,
   numberOfOffersPerPage,
   avoidJobTitles,
+  avoidCompanyNames,
 } = data;
 
 let page = "";
 let browser = "";
 let csvWriter = null;
 
-async function logs() {
-  console.log("mydata is :" + JSON.stringify(data));
-  console.log("\n================================================\n");
+function logs() {
+  console.clear();
+  console.log("\n==========================================\n");
+  console.log("\tLinkedIn Easy Apply Bot");
+  console.log("\n==========================================\n");
 }
 
 async function Login() {
@@ -136,7 +139,7 @@ async function clickElement(selector) {
 }
 
 async function Scrolling() {
-  console.log("Scrolling.....");
+  console.log("\nScrolling.....");
   try {
     await page.evaluate(() => {
       const element = document.querySelector(
@@ -175,6 +178,18 @@ function writeInCSV(data) {
     });
 }
 
+async function getCompanyName() {
+  const companyNameSelector =
+    ".job-details-jobs-unified-top-card__company-name>a";
+
+  const companyName = await page.evaluate((selector) => {
+    const element = document.querySelector(selector);
+    return element ? element.text : null;
+  }, companyNameSelector);
+
+  return companyName;
+}
+
 async function getJobTitle() {
   const jobTitleSelector = ".job-details-jobs-unified-top-card__job-title>h1>a";
 
@@ -201,8 +216,6 @@ async function FillAndApply() {
   let i = 1;
   let lastIndexForPagination = 1;
   while (i <= numberOfPagination) {
-    console.log("Scrolling the page N°" + i);
-
     for (let index = 1; index <= numberOfOffersPerPage; index++) {
       let state = true;
       await page.waitForTimeout(3000);
@@ -222,7 +235,17 @@ async function FillAndApply() {
       await page.waitForTimeout(2000);
       //Check for application button
       if ((await page.$("[class*=jobs-apply-button]>button")) != null) {
-        // Get the job title
+        let companyName = await getCompanyName();
+
+        const containsUnwantedCompanyName = avoidCompanyNames.some((name) =>
+          companyName.toLowerCase().includes(name.toLowerCase())
+        );
+
+        if (containsUnwantedCompanyName) {
+          console.log(`Skipping this job from company: ${companyName}`);
+          continue;
+        }
+
         let jobTitle = await getJobTitle();
         console.log("jobTitle: " + jobTitle);
         let jobLink = await getLink();
@@ -237,7 +260,7 @@ async function FillAndApply() {
         );
         if (jobTitleRegex.test(jobTitle)) {
           console.log(`Skipping job with title: ${jobTitle}`);
-          continue; // Skip this job and continue to the next one
+          continue;
         }
         console.log(`Applying to ${jobTitle} ...`);
 
