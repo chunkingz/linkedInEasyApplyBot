@@ -85,44 +85,48 @@ async function buttonClick(selector) {
   }
 }
 
+const pause = async (ms=3000) => {
+  await new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function jobCriteriaByTime() {
   await buttonClick(".search-reusables__filter-binary-toggle");
-  await page.waitForTimeout(2000);
+  await pause();
   await buttonClick(
     "ul.search-reusables__filter-list>li:nth-child(4)>div>span>button"
   );
   if (periodOfTime == "Past 24 hours") {
     // apply to the jobs posted in the last 24 hrs
-    await page.waitForTimeout(2000);
+    await pause();
     await buttonClick(
       "form > fieldset > div.pl4.pr6 > ul > li:nth-child(4) > label"
     );
-    await page.waitForTimeout(2000);
+    await pause();
     await buttonClick("form > fieldset > div + hr + div > button + button");
   } else {
     // apply to the jobs posted within the past week
-    await page.waitForTimeout(2000);
+    await pause();
     await buttonClick(
       "form > fieldset > div.pl4.pr6 > ul > li:nth-child(3) > label"
     );
-    await page.waitForTimeout(2000);
+    await pause();
     await buttonClick("form > fieldset > div + hr + div > button + button");
   }
 }
 
 async function jobCriteriaByType() {
   await buttonClick(".search-reusables__filter-list>li:nth-child(8)>div");
-  await page.waitForTimeout(2000);
+  await pause();
 
   await buttonClick(workPlaceTypes.remote);
   await buttonClick(workPlaceTypes.hybrid);
   await buttonClick(workPlaceTypes.onsite);
 
-  await page.waitForTimeout(2000);
+  await pause();
   await buttonClick(
     ".search-reusables__filter-list>li:nth-child(8)>div>div>div>div>div>form>fieldset>div+hr+div>button+button"
   ); // click the `show results` button
-  await page.waitForTimeout(2000);
+  await pause();
 }
 
 async function clickElement(selector) {
@@ -142,12 +146,11 @@ async function Scrolling() {
   console.log("\nScrolling.....");
   try {
     await page.evaluate(() => {
-      const element = document.querySelector(
+      const listOfJobs = document.querySelector(
         "div.scaffold-layout__list > div > ul"
       );
-      console.log("element: " + element);
-      if (element) {
-        element.scrollIntoView();
+      if (listOfJobs) {
+        listOfJobs.scrollIntoView();
       } else {
         console.error("Element not found for scrolling.");
       }
@@ -218,27 +221,23 @@ async function FillAndApply() {
   while (i <= numberOfPagination) {
     for (let index = 1; index <= numberOfOffersPerPage; index++) {
       let state = true;
-      await page.waitForTimeout(3000);
       await Scrolling();
       console.log(`Apply N°[${index}]`);
-      if (
-        (await page.$(
-          `li[class*="jobs-search-results__list-item"]:nth-child(${index})>div>div`
-        )) != null
-      ) {
-        await buttonClick(
-          `li[class*="jobs-search-results__list-item"]:nth-child(${index})>div>div`
-        );
+      const activeJob = `[class*='jobs-search-two-pane__job-card-container--viewport-tracking-${index-1}']>div`;
+
+      if ((await page.$(activeJob)) != null) {
+        await buttonClick(activeJob);
       }
+      
       if (index === numberOfOffersPerPage) lastIndexForPagination++;
 
-      await page.waitForTimeout(2000);
+      await pause();
       //Check for application button
       if ((await page.$("[class*=jobs-apply-button]>button")) != null) {
         let companyName = await getCompanyName();
 
         const containsUnwantedCompanyName = avoidCompanyNames.some((name) =>
-          companyName.toLowerCase().includes(name.toLowerCase())
+          companyName?.toLowerCase().includes(name?.toLowerCase())
         );
 
         if (containsUnwantedCompanyName) {
@@ -265,7 +264,7 @@ async function FillAndApply() {
         console.log(`Applying to ${jobTitle} ...`);
 
         // Click the "Easy Apply" button
-        await page.waitForTimeout(4000);
+        await pause();
         const easyApplyLimitReached = await page.evaluate(() => {
           const easyApplyLimitTextIsVisible = document.querySelector(
             'div[class*="mt3 artdeco-inline-feedback artdeco-inline-feedback--error ember-view"]'
@@ -286,7 +285,7 @@ async function FillAndApply() {
         }
 
         // Check to see if the "Job search safety reminder" dialog comes up instead
-        await page.waitForTimeout(4000);
+        await pause();
         await page.evaluate(() => {
           const continueApplyingButton = document.querySelector(
             'div[class="artdeco-modal__actionbar ember-view job-trust-pre-apply-safety-tips-modal__footer"]>button+div>div>button'
@@ -295,7 +294,7 @@ async function FillAndApply() {
         });
 
         while (state == true) {
-          await page.waitForTimeout(4000);
+          await pause();
           if (
             await page.evaluate(() => {
               const nextBtn = document.querySelector(
@@ -309,14 +308,14 @@ async function FillAndApply() {
             state = false;
             break;
           }
-          await page.waitForTimeout(3000);
+          await pause();
         }
         if (state == false) {
-          await page.waitForTimeout(3000);
+          await pause();
           await clickElement(
             'div[class="display-flex justify-flex-end ph5 pv4"]>button + button'
           );
-          await page.waitForTimeout(3000);
+          await pause();
 
           if (
             (await page.$(
@@ -332,7 +331,6 @@ async function FillAndApply() {
                 "value"
               ).set;
               for (let index = 0; index < inputElements.length; index++) {
-                setTimeout(() => {}, 2000);
                 nativeInputValueSetter.call(inputElements[index], value);
                 var inputEvent = new Event("input", { bubbles: true });
                 inputElements[index].dispatchEvent(inputEvent);
@@ -342,7 +340,7 @@ async function FillAndApply() {
           let counter = 0;
           let finalPage = false;
           do {
-            await page.waitForTimeout(4000);
+            await pause();
             const modalExists = await page.$(
               'div[class*="artdeco-modal-overlay"]>div>div+div>div>button>span'
             );
@@ -367,11 +365,11 @@ async function FillAndApply() {
           let skipped = false;
           if (counter >= 5 && finalPage === false) {
             // due to inactivity, skip the job
-            await page.waitForTimeout(3000);
+            await pause();
             await buttonClick(
               ".artdeco-modal__dismiss.artdeco-button.artdeco-button--circle.artdeco-button--muted.artdeco-button--2.artdeco-button--tertiary.ember-view"
             );
-            await page.waitForTimeout(4000);
+            await pause();
             await buttonClick(
               '[data-control-name="discard_application_confirm_btn"]'
             );
@@ -379,7 +377,7 @@ async function FillAndApply() {
             console.log("Job Skipped");
           } else {
             // Finish the job application by closing the dialog with the `X` button.
-            await page.waitForTimeout(4000);
+            await pause();
             await page.evaluate(() => {
               const xBtn = document.querySelector(
                 ".artdeco-modal__dismiss.artdeco-button.artdeco-button--circle.artdeco-button--muted.artdeco-button--2.artdeco-button--tertiary.ember-view"
@@ -409,17 +407,19 @@ async function FillAndApply() {
 
 async function jobsApply() {
   await buttonClick("#global-nav > div > nav > ul > li:nth-child(3)");
+  await pause();
+
   await waitForSelectorAndType(
     '[id^="jobs-search-box-keyword-id"]',
     keyword.join(" OR ")
   );
   // await waitForSelectorAndType('[id^="jobs-search-box-location-id"]', location);
-  await page.waitForTimeout(2000);
   await page.keyboard.press("Enter");
+  await pause(1000);
   await jobCriteriaByTime();
-  await page.waitForTimeout(4000);
+  await pause();
   await jobCriteriaByType();
-  await page.waitForTimeout(4000);
+  await pause();
   await FillAndApply();
 }
 
