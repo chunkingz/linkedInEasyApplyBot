@@ -2,6 +2,15 @@
 
 Bot used for LinkedIn easy apply
 
+
+## For Existing Users 🤓
+To upgrade the program on your machine simply pull the main branch, in your terminal type
+```shell
+git pull
+```
+
+# For New Users ✨
+
 ## Clone the repo
 ```shell
 git clone git@github.com:chunkingz/linkedInEasyApplyBot.git
