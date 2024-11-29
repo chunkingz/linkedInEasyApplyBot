@@ -39,7 +39,7 @@ async function Login() {
   page.keyboard.press("Enter");
 }
 
-async function initiliazer() {
+async function initializer() {
   browser = await puppeteer.launch({
     headless: false,
     executablePath: browserPath,
@@ -311,7 +311,7 @@ async function FillAndApply() {
           await pause();
         }
         if (state == false) {
-          await pause();
+          // TODO: add `await page.evaluate()` to the element below, test with kforce jobs or jobs that only have one page.
           await clickElement(
             'div[class="display-flex justify-flex-end ph5 pv4"]>button + button'
           );
@@ -413,7 +413,17 @@ async function jobsApply() {
     '[id^="jobs-search-box-keyword-id"]',
     keyword.join(" OR ")
   );
-  // await waitForSelectorAndType('[id^="jobs-search-box-location-id"]', location);
+
+  await pause(1000);
+  const jobLocationSelector = '[id^="jobs-search-box-location-id"]';
+
+  await page.evaluate((selector) => {
+    const locationSelector = document.querySelector(selector);
+    if (locationSelector) locationSelector.value = "";
+  }, jobLocationSelector);
+
+  await waitForSelectorAndType(jobLocationSelector, location);
+
   await page.keyboard.press("Enter");
   await pause(1000);
   await jobCriteriaByTime();
@@ -425,7 +435,7 @@ async function jobsApply() {
 
 async function main() {
   logs();
-  await initiliazer();
+  await initializer();
   await Login();
   await jobsApply();
   await browser.close();
