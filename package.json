@@ -1,8 +1,8 @@
 {
-    "version": "1.0.6",
+    "version": "1.0.7",
     "main": "index.js",
+    "author": "Fortune King",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node index.js",
         "dev": "nodemon index.js",
         "bump": "npm version patch"
