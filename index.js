@@ -33,7 +33,7 @@ function logs() {
   console.log("\n==========================================\n");
 }
 
-async function Login() {
+async function login() {
   await findTargetAndType('[name="session_key"]', email);
   await findTargetAndType('[name="session_password"]', password);
   page.keyboard.press("Enter");
@@ -87,6 +87,17 @@ async function buttonClick(selector) {
 
 const pause = async (ms=3000) => {
   await new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function jobCriteriaByLocation() {
+  const jobLocationSelector = '[id^="jobs-search-box-location-id"]';
+
+  await page.evaluate((selector) => {
+    const locationSelector = document.querySelector(selector);
+    if (locationSelector) locationSelector.value = "";
+  }, jobLocationSelector);
+
+  await waitForSelectorAndType(jobLocationSelector, location);
 }
 
 async function jobCriteriaByTime() {
@@ -172,7 +183,7 @@ function changeValue(input, value) {
 
 function writeInCSV(data) {
   csvWriter
-    .writeRecords([data]) // Write data to CSV
+    .writeRecords([data])
     .then(() => {
       console.log("CSV file written successfully");
     })
@@ -215,7 +226,7 @@ async function getLink() {
   return jobLink;
 }
 
-async function FillAndApply() {
+async function fillAndApply() {
   let i = 1;
   let lastIndexForPagination = 1;
   while (i <= numberOfPagination) {
@@ -400,12 +411,12 @@ async function FillAndApply() {
     await buttonClick(
       `ul[class="artdeco-pagination__pages artdeco-pagination__pages--number"]>li:nth-child(${lastIndexForPagination})`
     );
-    i++;
     console.log("finished Scrolling page N°" + (i - 1));
+    i++;
   }
 }
 
-async function jobsApply() {
+async function filterAndSearch() {
   await buttonClick("#global-nav > div > nav > ul > li:nth-child(3)");
   await pause();
 
@@ -415,29 +426,21 @@ async function jobsApply() {
   );
 
   await pause(1000);
-  const jobLocationSelector = '[id^="jobs-search-box-location-id"]';
-
-  await page.evaluate((selector) => {
-    const locationSelector = document.querySelector(selector);
-    if (locationSelector) locationSelector.value = "";
-  }, jobLocationSelector);
-
-  await waitForSelectorAndType(jobLocationSelector, location);
-
+  await jobCriteriaByLocation();
   await page.keyboard.press("Enter");
   await pause(1000);
   await jobCriteriaByTime();
   await pause();
   await jobCriteriaByType();
   await pause();
-  await FillAndApply();
 }
 
 async function main() {
   logs();
   await initializer();
-  await Login();
-  await jobsApply();
+  await login();
+  await filterAndSearch();
+  await fillAndApply();
   await browser.close();
 }
 
