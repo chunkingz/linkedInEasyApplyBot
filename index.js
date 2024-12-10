@@ -337,26 +337,27 @@ async function fillAndApply() {
           );
           await pause();
 
-          if (
-            (await page.$(
-              'input[class="ember-text-field ember-view fb-single-line-text__input"]'
-            )) != null
-          ) {
-            await page.evaluate(() => {
-              const divElem = document.querySelector("div.pb4");
-              const inputElements = divElem.querySelectorAll("input");
-              let value = 3;
-              var nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-                window.HTMLInputElement.prototype,
-                "value"
-              ).set;
-              for (let index = 0; index < inputElements.length; index++) {
-                nativeInputValueSetter.call(inputElements[index], value);
-                var inputEvent = new Event("input", { bubbles: true });
-                inputElements[index].dispatchEvent(inputEvent);
-              }
-            });
-          }
+          // TODO: This part currently does nothing but should be used to auto input, to be done later.
+          // if (
+          //   (await page.$(
+          //     'input[class="ember-text-field ember-view fb-single-line-text__input"]'
+          //   )) != null
+          // ) {
+          //   await page.evaluate(() => {
+          //     const divElem = document.querySelector("div.pb4");
+          //     const inputElements = divElem.querySelectorAll("input");
+          //     let value = 3;
+          //     var nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+          //       window.HTMLInputElement.prototype,
+          //       "value"
+          //     ).set;
+          //     for (let index = 0; index < inputElements.length; index++) {
+          //       nativeInputValueSetter.call(inputElements[index], value);
+          //       var inputEvent = new Event("input", { bubbles: true });
+          //       inputElements[index].dispatchEvent(inputEvent);
+          //     }
+          //   });
+          // }
           let counter = 0;
           let finalPage = false;
           do {
