@@ -89,9 +89,18 @@ const pause = async (ms=3000) => {
   await new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function jobCriteriaByKeywords() {
+  const searchBox = "#global-nav > div > nav > ul > li:nth-child(3)";
+  await buttonClick(searchBox);
+  await pause();
+  await waitForSelectorAndType(
+    '[id^="jobs-search-box-keyword-id"]',
+    keyword.join(" OR ")
+  );
+}
+
 async function jobCriteriaByLocation() {
   const jobLocationSelector = '[id^="jobs-search-box-location-id"]';
-
   await page.evaluate((selector) => {
     const locationSelector = document.querySelector(selector);
     if (locationSelector) locationSelector.value = "";
@@ -417,14 +426,7 @@ async function fillAndApply() {
 }
 
 async function filterAndSearch() {
-  await buttonClick("#global-nav > div > nav > ul > li:nth-child(3)");
-  await pause();
-
-  await waitForSelectorAndType(
-    '[id^="jobs-search-box-keyword-id"]',
-    keyword.join(" OR ")
-  );
-
+  await jobCriteriaByKeywords();
   await pause(1000);
   await jobCriteriaByLocation();
   await page.keyboard.press("Enter");
