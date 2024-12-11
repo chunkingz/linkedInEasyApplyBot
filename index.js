@@ -85,9 +85,9 @@ async function buttonClick(selector) {
   }
 }
 
-const pause = async (ms=3000) => {
-  await new Promise(resolve => setTimeout(resolve, ms));
-}
+const pause = async (ms = 3000) => {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+};
 
 async function jobCriteriaByKeywords() {
   const searchBox = "#global-nav > div > nav > ul > li:nth-child(3)";
@@ -238,17 +238,22 @@ async function getLink() {
 async function fillAndApply() {
   let i = 1;
   let lastIndexForPagination = 1;
+  // TODO: calculate `numberOfPagination` properly using number of jobs in the search and number of jobs per page
+  // TODO:  Also break out of the loop and end the app when we have reached the last job.
   while (i <= numberOfPagination) {
     for (let index = 1; index <= numberOfOffersPerPage; index++) {
       let state = true;
       await Scrolling();
+      // TODO: change the index to use the current overall job number / the total number of jobs
       console.log(`Apply N°[${index}]`);
-      const activeJob = `[class*='jobs-search-two-pane__job-card-container--viewport-tracking-${index-1}']>div`;
+      const activeJob = `[class*='jobs-search-two-pane__job-card-container--viewport-tracking-${
+        index - 1
+      }']>div`;
 
       if ((await page.$(activeJob)) != null) {
         await buttonClick(activeJob);
       }
-      
+
       if (index === numberOfOffersPerPage) lastIndexForPagination++;
 
       await pause();
@@ -283,18 +288,14 @@ async function fillAndApply() {
         }
         console.log(`Applying to ${jobTitle} ...`);
 
-        // Click the "Easy Apply" button
         await pause();
         const easyApplyLimitReached = await page.evaluate(() => {
-          const easyApplyLimitTextIsVisible = document.querySelector(
-            'div[class*="mt3 artdeco-inline-feedback artdeco-inline-feedback--error ember-view"]'
+          const easyApplyLimitEl = document.querySelector(
+            ".artdeco-inline-feedback__message"
           );
-          if (easyApplyLimitTextIsVisible) return true;
-
-          const easyApplyButton = document.querySelector(
-            'div[class*="jobs-apply-button"]>button'
+          return (
+            easyApplyLimitEl && easyApplyLimitEl.innerText.includes("limit")
           );
-          if (easyApplyButton) easyApplyButton.click();
         });
 
         if (easyApplyLimitReached) {
@@ -303,6 +304,9 @@ async function fillAndApply() {
           );
           exit(0);
         }
+
+        const easyApplyButton = 'div[class*="jobs-apply-button"]>button';
+        await buttonClick(easyApplyButton);
 
         // Check to see if the "Job search safety reminder" dialog comes up instead
         await pause();
@@ -421,7 +425,7 @@ async function fillAndApply() {
     await buttonClick(
       `ul[class="artdeco-pagination__pages artdeco-pagination__pages--number"]>li:nth-child(${lastIndexForPagination})`
     );
-    console.log("finished Scrolling page N°" + (i - 1));
+    console.log(`Finished scrolling page N° ${i}`);
     i++;
   }
 }
