@@ -45,7 +45,8 @@
     "NET",
     "LOCAL",
     "CITIZEN",
-    "CLEARED"
+    "CLEARED",
+    "FOUNDING"
   ],
   "avoidCompanyNames": ["Test Company", "Defense Systems", "RLS Associates", "Refonte Learning"]
 }

@@ -114,23 +114,14 @@ async function jobCriteriaByTime() {
   await buttonClick(
     "ul.search-reusables__filter-list>li:nth-child(4)>div>span>button"
   );
-  if (periodOfTime == "Past 24 hours") {
-    // apply to the jobs posted in the last 24 hrs
-    await pause();
-    await buttonClick(
-      "form > fieldset > div.pl4.pr6 > ul > li:nth-child(4) > label"
-    );
-    await pause();
-    await buttonClick("form > fieldset > div + hr + div > button + button");
-  } else {
-    // apply to the jobs posted within the past week
-    await pause();
-    await buttonClick(
-      "form > fieldset > div.pl4.pr6 > ul > li:nth-child(3) > label"
-    );
-    await pause();
-    await buttonClick("form > fieldset > div + hr + div > button + button");
-  }
+  await pause();
+  await buttonClick(
+    `form > fieldset > div.pl4.pr6 > ul > li:nth-child(${
+      periodOfTime === "Past 24 hours" ? 4 : 3
+    }) > label`
+  );
+  await pause();
+  await buttonClick("form > fieldset > div + hr + div > button + button");
 }
 
 async function jobCriteriaByType() {
@@ -236,33 +227,37 @@ async function getLink() {
 
 const getTotalJobResult = async () => {
   const jobResultString = await page.evaluate(() => {
-    const el = document.querySelector("[class*='jobs-search-results-list__subtitle']");
-    return el ? el.innerText.split(" ")[0] : '';
+    const el = document.querySelector(
+      "[class*='jobs-search-results-list__subtitle']"
+    );
+    return el ? el.innerText.split(" ")[0] : "";
   });
   return jobResultString.split(",").join("");
-} 
+};
 
 async function fillAndApply() {
   const totalJobCount = await getTotalJobResult();
-  const maxPagination = parseInt(Math.ceil(parseFloat(totalJobCount) / parseFloat(numberOfJobsPerPage)));
+  const maxPagination = parseInt(
+    Math.ceil(parseFloat(totalJobCount) / parseFloat(numberOfJobsPerPage))
+  );
 
   let currentPage = 1;
-  let currentJobIndex = 0;
+  let currentJobIndex = 1;
 
   while (currentPage <= maxPagination) {
     for (let index = 0; index < numberOfJobsPerPage; index++) {
-      if (currentJobIndex >= totalJobCount){
-        console.log("==========\nThat's all the available jobs, adjust filters and try again.\n==========");
+      if (currentJobIndex > totalJobCount) {
+        console.log(
+          "==========\nThat's all the available jobs, adjust filters and try again.\n=========="
+        );
         exit(0);
       }
       let state = true;
       await Scrolling();
 
-      console.log(`Apply N° [${currentJobIndex+1} / ${totalJobCount}]`);
+      console.log(`Job N° [${currentJobIndex} / ${totalJobCount}]`);
       currentJobIndex++;
-      const activeJob = `[class*='jobs-search-two-pane__job-card-container--viewport-tracking-${
-        index
-      }']>div`;
+      const activeJob = `[class*='jobs-search-two-pane__job-card-container--viewport-tracking-${index}']>div`;
 
       if ((await page.$(activeJob)) != null) {
         await buttonClick(activeJob);
@@ -282,10 +277,8 @@ async function fillAndApply() {
           continue;
         }
 
-        let jobTitle = await getJobTitle();
-        console.log("jobTitle: " + jobTitle);
-        let jobLink = await getLink();
-        console.log("jobLink: " + jobLink);
+        const jobTitle = await getJobTitle();
+        const jobLink = await getLink();
 
         // Check if the job title is in the list of titles to avoid
         const jobTitleRegex = new RegExp(
@@ -436,12 +429,14 @@ async function fillAndApply() {
     await Scrolling();
     console.log(`Finished scrolling page N° ${currentPage}`);
 
-    if(currentPage < maxPagination){
+    if (currentPage < maxPagination) {
       await buttonClick(
-        `ul[class="artdeco-pagination__pages artdeco-pagination__pages--number"]>li:nth-child(${currentPage + 1})`
+        `ul[class="artdeco-pagination__pages artdeco-pagination__pages--number"]>li:nth-child(${
+          currentPage + 1
+        })`
       );
     }
-    
+
     currentPage++;
   }
 }
