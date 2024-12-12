@@ -20,8 +20,7 @@
   "AvgExperience": 2,
   "resolution": "--window-size=1400,900",
   "baseURL": "https://www.linkedin.com/login",
-  "numberOfPagination": 14,
-  "numberOfOffersPerPage": 25,
+  "numberOfJobsPerPage": 25,
   "avoidJobTitles": [
     "TEST",
     "EMBEDDED",

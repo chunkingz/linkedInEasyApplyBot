@@ -16,8 +16,7 @@ const {
   periodOfTime,
   browserPath,
   resolution,
-  numberOfPagination,
-  numberOfOffersPerPage,
+  numberOfJobsPerPage,
   avoidJobTitles,
   avoidCompanyNames,
 } = data;
@@ -85,9 +84,9 @@ async function buttonClick(selector) {
   }
 }
 
-const pause = async (ms=3000) => {
-  await new Promise(resolve => setTimeout(resolve, ms));
-}
+const pause = async (ms = 3000) => {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+};
 
 async function jobCriteriaByKeywords() {
   const searchBox = "#global-nav > div > nav > ul > li:nth-child(3)";
@@ -235,21 +234,39 @@ async function getLink() {
   return jobLink;
 }
 
+const getTotalJobResult = async () => {
+  const jobResultString = await page.evaluate(() => {
+    const el = document.querySelector("[class*='jobs-search-results-list__subtitle']");
+    return el ? el.innerText.split(" ")[0] : '';
+  });
+  return jobResultString.split(",").join("");
+} 
+
 async function fillAndApply() {
-  let i = 1;
-  let lastIndexForPagination = 1;
-  while (i <= numberOfPagination) {
-    for (let index = 1; index <= numberOfOffersPerPage; index++) {
+  const totalJobCount = await getTotalJobResult();
+  const maxPagination = parseInt(Math.ceil(parseFloat(totalJobCount) / parseFloat(numberOfJobsPerPage)));
+
+  let currentPage = 1;
+  let currentJobIndex = 0;
+
+  while (currentPage <= maxPagination) {
+    for (let index = 0; index < numberOfJobsPerPage; index++) {
+      if (currentJobIndex >= totalJobCount){
+        console.log("==========\nThat's all the available jobs, adjust filters and try again.\n==========");
+        exit(0);
+      }
       let state = true;
       await Scrolling();
-      console.log(`Apply N°[${index}]`);
-      const activeJob = `[class*='jobs-search-two-pane__job-card-container--viewport-tracking-${index-1}']>div`;
+
+      console.log(`Apply N° [${currentJobIndex+1} / ${totalJobCount}]`);
+      currentJobIndex++;
+      const activeJob = `[class*='jobs-search-two-pane__job-card-container--viewport-tracking-${
+        index
+      }']>div`;
 
       if ((await page.$(activeJob)) != null) {
         await buttonClick(activeJob);
       }
-      
-      if (index === numberOfOffersPerPage) lastIndexForPagination++;
 
       await pause();
       //Check for application button
@@ -283,18 +300,14 @@ async function fillAndApply() {
         }
         console.log(`Applying to ${jobTitle} ...`);
 
-        // Click the "Easy Apply" button
         await pause();
         const easyApplyLimitReached = await page.evaluate(() => {
-          const easyApplyLimitTextIsVisible = document.querySelector(
-            'div[class*="mt3 artdeco-inline-feedback artdeco-inline-feedback--error ember-view"]'
+          const easyApplyLimitEl = document.querySelector(
+            ".artdeco-inline-feedback__message"
           );
-          if (easyApplyLimitTextIsVisible) return true;
-
-          const easyApplyButton = document.querySelector(
-            'div[class*="jobs-apply-button"]>button'
+          return (
+            easyApplyLimitEl && easyApplyLimitEl.innerText.includes("limit")
           );
-          if (easyApplyButton) easyApplyButton.click();
         });
 
         if (easyApplyLimitReached) {
@@ -303,6 +316,9 @@ async function fillAndApply() {
           );
           exit(0);
         }
+
+        const easyApplyButton = 'div[class*="jobs-apply-button"]>button';
+        await buttonClick(easyApplyButton);
 
         // Check to see if the "Job search safety reminder" dialog comes up instead
         await pause();
@@ -418,11 +434,15 @@ async function fillAndApply() {
     }
 
     await Scrolling();
-    await buttonClick(
-      `ul[class="artdeco-pagination__pages artdeco-pagination__pages--number"]>li:nth-child(${lastIndexForPagination})`
-    );
-    console.log("finished Scrolling page N°" + (i - 1));
-    i++;
+    console.log(`Finished scrolling page N° ${currentPage}`);
+
+    if(currentPage < maxPagination){
+      await buttonClick(
+        `ul[class="artdeco-pagination__pages artdeco-pagination__pages--number"]>li:nth-child(${currentPage + 1})`
+      );
+    }
+    
+    currentPage++;
   }
 }
 
