@@ -126,17 +126,15 @@ async function jobCriteriaByTime() {
 
 async function jobCriteriaByType() {
   await buttonClick(".search-reusables__filter-list>li:nth-child(8)>div");
-  await pause();
+  await pause(2000);
 
-  await buttonClick(workPlaceTypes.remote);
-  await buttonClick(workPlaceTypes.hybrid);
-  await buttonClick(workPlaceTypes.onsite);
+  for (const selector of Object.values(workPlaceTypes)) {    
+    await buttonClick(selector);
+  }
 
-  await pause();
-  await buttonClick(
-    ".search-reusables__filter-list>li:nth-child(8)>div>div>div>div>div>form>fieldset>div+hr+div>button+button"
-  ); // click the `show results` button
-  await pause();
+  await pause(2000);
+  const showResultsBtn = ".search-reusables__filter-list>li:nth-child(8)>div>div>div>div>div>form>fieldset>div+hr+div>button+button";
+  await buttonClick(showResultsBtn);
 }
 
 async function clickElement(selector) {
@@ -184,10 +182,10 @@ function writeInCSV(data) {
   csvWriter
     .writeRecords([data])
     .then(() => {
-      console.log("CSV file written successfully");
+      console.log("CSV file updated\n");
     })
     .catch((error) => {
-      console.error("Error writing new entry:", error);
+      console.error("Error updating CSV file:\n", error);
     });
 }
 
