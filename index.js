@@ -8,6 +8,7 @@ const data = require("./config.json");
 const { EMAIL: email, PASSWORD: password } = process.env;
 
 const {
+  locale,
   baseURL,
   keyword,
   workPlaceTypes,
@@ -18,8 +19,10 @@ const {
   resolution,
   numberOfJobsPerPage,
   avoidJobTitles,
-  avoidCompanyNames,
+  avoidCompanies,
 } = data;
+
+const t = require(`./i18n/${locale}.json`);
 
 let page = "";
 let browser = "";
@@ -28,7 +31,7 @@ let csvWriter = null;
 function logs() {
   console.clear();
   console.log("\n==========================================\n");
-  console.log("\tLinkedIn Easy Apply Bot");
+  console.log(`\t${t.appTitle}`);
   console.log("\n==========================================\n");
 }
 
@@ -74,13 +77,17 @@ async function waitForSelectorAndType(target, value) {
   await typer.type(value);
 }
 
-async function buttonClick(selector) {
+async function clickElement(selector) {
   try {
     await page.waitForSelector(selector);
-    const buttonClick = await page.$(selector);
-    await buttonClick.click();
+    const element = await page.$(selector);
+    if(element !== null){
+      await element.click();
+    }else{
+      console.error(`${t.elSelector}: "${selector}" ${t.notFound}.`);
+    }
   } catch (error) {
-    console.error(`Error clicking element with selector '${selector}':`, error);
+    console.error(`${t.badSelector}: "${selector}". \n${error}`);
   }
 }
 
@@ -90,7 +97,7 @@ const pause = async (ms = 3000) => {
 
 async function jobCriteriaByKeywords() {
   const searchBox = "#global-nav > div > nav > ul > li:nth-child(3)";
-  await buttonClick(searchBox);
+  await clickElement(searchBox);
   await pause();
   await waitForSelectorAndType(
     '[id^="jobs-search-box-keyword-id"]',
@@ -109,49 +116,37 @@ async function jobCriteriaByLocation() {
 }
 
 async function jobCriteriaByTime() {
-  await buttonClick(".search-reusables__filter-binary-toggle");
+  await clickElement(".search-reusables__filter-binary-toggle");
   await pause();
-  await buttonClick(
+  await clickElement(
     "ul.search-reusables__filter-list>li:nth-child(4)>div>span>button"
   );
   await pause();
-  await buttonClick(
+  await clickElement(
     `form > fieldset > div.pl4.pr6 > ul > li:nth-child(${
       periodOfTime === "Past 24 hours" ? 4 : 3
     }) > label`
   );
   await pause();
-  await buttonClick("form > fieldset > div + hr + div > button + button");
+  await clickElement("form > fieldset > div + hr + div > button + button");
 }
 
 async function jobCriteriaByType() {
-  await buttonClick(".search-reusables__filter-list>li:nth-child(8)>div");
+  await clickElement(".search-reusables__filter-list>li:nth-child(8)>div");
   await pause(2000);
 
-  for (const selector of Object.values(workPlaceTypes)) {    
-    await buttonClick(selector);
+  for (const selector of Object.values(workPlaceTypes)) {
+    await clickElement(selector);
   }
 
   await pause(2000);
-  const showResultsBtn = ".search-reusables__filter-list>li:nth-child(8)>div>div>div>div>div>form>fieldset>div+hr+div>button+button";
-  await buttonClick(showResultsBtn);
-}
-
-async function clickElement(selector) {
-  try {
-    const element = await page.$(selector);
-    if (element !== null) {
-      await element.click();
-    } else {
-      console.error(`Element with selector '${selector}' not found.`);
-    }
-  } catch (error) {
-    console.error(`Error clicking element with selector '${selector}':`, error);
-  }
+  const showResultsBtn =
+    ".search-reusables__filter-list>li:nth-child(8)>div>div>div>div>div>form>fieldset>div+hr+div>button+button";
+  await clickElement(showResultsBtn);
 }
 
 async function Scrolling() {
-  console.log("\nScrolling.....");
+  console.log(`\n${t.scroll}.....`);
   try {
     await page.evaluate(() => {
       const listOfJobs = document.querySelector(
@@ -160,11 +155,11 @@ async function Scrolling() {
       if (listOfJobs) {
         listOfJobs.scrollIntoView();
       } else {
-        console.error("Element not found for scrolling.");
+        console.error(`${t.el404Scroll}.`);
       }
     });
   } catch (error) {
-    console.error("Error scrolling:", error);
+    console.error(`${t.errorOnScroll}: \n${error}`);
   }
 }
 
@@ -182,10 +177,10 @@ function writeInCSV(data) {
   csvWriter
     .writeRecords([data])
     .then(() => {
-      console.log("CSV file updated\n");
+      console.log(`${t.csvSuccess}\n`);
     })
     .catch((error) => {
-      console.error("Error updating CSV file:\n", error);
+      console.error(`${t.csvError}: \n${error}`);
     });
 }
 
@@ -245,33 +240,30 @@ async function fillAndApply() {
   while (currentPage <= maxPagination) {
     for (let index = 0; index < numberOfJobsPerPage; index++) {
       if (currentJobIndex > totalJobCount) {
-        console.log(
-          "==========\nThat's all the available jobs, adjust filters and try again.\n=========="
-        );
+        console.log(`==========\n${t.endOfScript}.\n==========`);
         exit(0);
       }
       let state = true;
       await Scrolling();
 
-      console.log(`Job N° [${currentJobIndex} / ${totalJobCount}]`);
+      console.log(`${t.jobNo} [${currentJobIndex} / ${totalJobCount}]`);
       currentJobIndex++;
       const activeJob = `[class*='jobs-search-two-pane__job-card-container--viewport-tracking-${index}']>div`;
 
-      if ((await page.$(activeJob)) != null) {
-        await buttonClick(activeJob);
-      }
+      await clickElement(activeJob);
 
       await pause();
       //Check for application button
-      if ((await page.$("[class*=jobs-apply-button]>button")) != null) {
+      const easyApplyButton = "[class*=jobs-apply-button]>button";
+      if ((await page.$(easyApplyButton)) != null) {
         let companyName = await getCompanyName();
 
-        const containsUnwantedCompanyName = avoidCompanyNames.some((name) =>
+        const containsUnwantedCompanyName = avoidCompanies.some((name) =>
           companyName?.toLowerCase().includes(name?.toLowerCase())
         );
 
         if (containsUnwantedCompanyName) {
-          console.log(`Skipping this job from company: ${companyName}`);
+          console.log(`${t.skipCompany}: ${companyName}`);
           continue;
         }
 
@@ -286,10 +278,10 @@ async function fillAndApply() {
           "i"
         );
         if (jobTitleRegex.test(jobTitle)) {
-          console.log(`Skipping job with title: ${jobTitle}`);
+          console.log(`${t.skipTitle}: ${jobTitle}`);
           continue;
         }
-        console.log(`Applying to ${jobTitle} ...`);
+        console.log(`${t.applyTo} ${jobTitle} ...`);
 
         await pause();
         const easyApplyLimitReached = await page.evaluate(() => {
@@ -302,14 +294,11 @@ async function fillAndApply() {
         });
 
         if (easyApplyLimitReached) {
-          console.log(
-            "==========\nYou've reached the Easy Apply application limit for today. Exiting the app...\n=========="
-          );
+          console.log(`==========\n${t.limit}...\n==========`);
           exit(0);
         }
 
-        const easyApplyButton = 'div[class*="jobs-apply-button"]>button';
-        await buttonClick(easyApplyButton);
+        await clickElement(easyApplyButton);
 
         // Check to see if the "Job search safety reminder" dialog comes up instead
         await pause();
@@ -374,7 +363,7 @@ async function fillAndApply() {
             );
             if (!modalExists) {
               counter++;
-              console.log("counter: " + counter);
+              console.log(`${t.counter}: ${counter}`);
 
               finalPage = await page.evaluate(() => {
                 const nextButton = document.querySelector(
@@ -394,15 +383,15 @@ async function fillAndApply() {
           if (counter >= 5 && finalPage === false) {
             // due to inactivity, skip the job
             await pause();
-            await buttonClick(
+            await clickElement(
               ".artdeco-modal__dismiss.artdeco-button.artdeco-button--circle.artdeco-button--muted.artdeco-button--2.artdeco-button--tertiary.ember-view"
             );
             await pause();
-            await buttonClick(
+            await clickElement(
               '[data-control-name="discard_application_confirm_btn"]'
             );
             skipped = true;
-            console.log("Job Skipped");
+            console.log(`${t.jobSkipped}`);
           } else {
             // Finish the job application by closing the dialog with the `X` button.
             await pause();
@@ -421,14 +410,14 @@ async function fillAndApply() {
             status: skipped ? "Skipped" : "Applied",
           });
         }
-      }
+      } else console.log(t.alreadyApplied);
     }
 
     await Scrolling();
-    console.log(`Finished scrolling page N° ${currentPage}`);
+    console.log(`${t.scrolledPage} ${currentPage}`);
 
     if (currentPage < maxPagination) {
-      await buttonClick(
+      await clickElement(
         `ul[class="artdeco-pagination__pages artdeco-pagination__pages--number"]>li:nth-child(${
           currentPage + 1
         })`
