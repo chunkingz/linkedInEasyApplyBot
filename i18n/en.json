@@ -1,0 +1,21 @@
+{
+  "appTitle": "LinkedIn Easy Apply Bot",
+  "scroll": "Scrolling",
+  "csvSuccess": "CSV file updated",
+  "csvError": "Error updating CSV file",
+  "endOfScript": "That's all the available jobs, adjust filters and try again",
+  "jobNo": "Job N°",
+  "skipCompany": "Skipping this job from company",
+  "skipTitle": "Skipping job with title",
+  "applyTo": "Applying to",
+  "limit": "You've reached the Easy Apply application limit for today. Exiting the app",
+  "counter": "counter",
+  "jobSkipped": "Job Skipped",
+  "scrolledPage": "Finished scrolling page N°",
+  "badSelector": "Error clicking element with selector",
+  "elSelector": "Element with selector",
+  "notFound": "not found",
+  "el404Scroll": "Element not found for scrolling",
+  "errorOnScroll": "Error scrolling",
+  "alreadyApplied": "Skipping this job... Reason: Already Applied"
+}

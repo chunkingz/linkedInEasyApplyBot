@@ -2,6 +2,8 @@
 
 Bot used for LinkedIn easy apply
 
+## User Config 📡
+Edit the `config.json` to match your job search criteria
 
 ## For Existing Users 🤓
 To upgrade the program on your machine simply pull the main branch, in your terminal type
@@ -37,13 +39,19 @@ PASSWORD=your_password
 npm start
 ```
 
-## Optional dev mode
+## Optional dev mode 🔧
 ```shell
 npm run dev
 ```
 
-## Extras
-Edit the `config.json` to match your job search criteria
+## i18n 🈶
+If you would like to add a different language for internationalization, simply create the json file in the `i18n` directory with the language initials and add the translations.
+
+example: 
+
+```shell
+touch fr.json # `fr` = french translation
+```
 
 <br>
 
