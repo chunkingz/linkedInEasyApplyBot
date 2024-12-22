@@ -15,7 +15,7 @@ git pull
 
 ## Clone the repo
 ```shell
-git clone git@github.com:chunkingz/linkedInEasyApplyBot.git
+git clone https://github.com:chunkingz/linkedInEasyApplyBot.git
 ```
 
 ## Initialize the app
