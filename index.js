@@ -81,13 +81,13 @@ async function clickElement(selector) {
   try {
     await page.waitForSelector(selector);
     const element = await page.$(selector);
-    if(element !== null){
+    if (element !== null) {
       await element.click();
-    }else{
-      console.error(`${t.elSelector}: "${selector}" ${t.notFound}.`);
+    } else {
+      console.error(`\n${t.elSelector}: "${selector}" ${t.notFound}.`);
     }
   } catch (error) {
-    console.error(`${t.badSelector}: "${selector}". \n${error}`);
+    console.error(error);
   }
 }
 
@@ -121,7 +121,7 @@ async function jobCriteriaByTime() {
   await clickElement(
     "ul.search-reusables__filter-list>li:nth-child(4)>div>span>button"
   );
-  await pause();
+  await pause(2000);
   await clickElement(
     `form > fieldset > div.pl4.pr6 > ul > li:nth-child(${
       periodOfTime === "Past 24 hours" ? 4 : 3
@@ -240,7 +240,7 @@ async function fillAndApply() {
   while (currentPage <= maxPagination) {
     for (let index = 0; index < numberOfJobsPerPage; index++) {
       if (currentJobIndex > totalJobCount) {
-        console.log(`==========\n${t.endOfScript}.\n==========`);
+        console.log(`\n==========\n${t.endOfScript}.\n==========`);
         exit(0);
       }
       let state = true;
@@ -354,7 +354,8 @@ async function fillAndApply() {
           //     }
           //   });
           // }
-          let counter = 0;
+
+          let counter = 30;
           let finalPage = false;
           do {
             await pause();
@@ -362,8 +363,8 @@ async function fillAndApply() {
               'div[class*="artdeco-modal-overlay"]>div>div+div>div>button>span'
             );
             if (!modalExists) {
-              counter++;
-              console.log(`${t.counter}: ${counter}`);
+              counter--;
+              process.stdout.write(`\r${t.waiting}: ${counter}${t.remains}`);
 
               finalPage = await page.evaluate(() => {
                 const nextButton = document.querySelector(
@@ -376,11 +377,13 @@ async function fillAndApply() {
                   return true;
                 }
               });
-            } else counter = -2;
-          } while (counter >= 0 && counter < 20 && finalPage === false);
+            } else {
+              counter = -2;
+            }
+          } while (counter > 0 && counter <= 30 && finalPage === false);
 
           let skipped = false;
-          if (counter >= 5 && finalPage === false) {
+          if (finalPage === false) {
             // due to inactivity, skip the job
             await pause();
             await clickElement(
@@ -391,7 +394,7 @@ async function fillAndApply() {
               '[data-control-name="discard_application_confirm_btn"]'
             );
             skipped = true;
-            console.log(`${t.jobSkipped}`);
+            console.log(`\n${t.jobSkipped}`);
           } else {
             // Finish the job application by closing the dialog with the `X` button.
             await pause();
@@ -406,7 +409,7 @@ async function fillAndApply() {
           // Add the Job to the CSV file
           writeInCSV({
             jobTitle: jobTitle,
-            link: "https://www.linkedin.com" + jobLink,
+            link: jobLink,
             status: skipped ? "Skipped" : "Applied",
           });
         }

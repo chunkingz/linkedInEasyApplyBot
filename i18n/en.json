@@ -9,13 +9,13 @@
   "skipTitle": "Skipping job with title",
   "applyTo": "Applying to",
   "limit": "You've reached the Easy Apply application limit for today. Exiting the app",
-  "counter": "counter",
   "jobSkipped": "Job Skipped",
   "scrolledPage": "Finished scrolling page N°",
-  "badSelector": "Error clicking element with selector",
   "elSelector": "Element with selector",
   "notFound": "not found",
   "el404Scroll": "Element not found for scrolling",
   "errorOnScroll": "Error scrolling",
-  "alreadyApplied": "Skipping this job... Reason: Already Applied"
+  "alreadyApplied": "Skipping this job... Reason: Already Applied",
+  "waiting": "Waiting for user input",
+  "remains": "s remaining"
 }
