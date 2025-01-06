@@ -4,10 +4,10 @@
   "keyword": [
     "\"Software Engineer\"",
     "\"Full Stack Engineer\"",
-    "\"fullstack developer\"",
-    "\"full stack developer\"",
-    "\"javascript developer\"",
-    "\"nodejs developer\"",
+    "\"Fullstack developer\"",
+    "\"Typescript developer\"",
+    "\"Javascript developer\"",
+    "\"Nodejs developer\"",
     "\"Java Developer\"",
     "\"Java Engineer\""
   ],
@@ -38,18 +38,23 @@
     "USC",
     "GC",
     "SECRET",
+    "TSSCI",
+    "POLY",
     "TOP",
     "NET",
     "LOCAL",
     "CITIZEN",
+    "CITIZENSHIP",
     "CLEARED",
     "FOUNDING"
   ],
   "avoidCompanies": [
+    "Gallup",
     "Test Company",
     "Defense Systems",
     "RLS Associates",
     "Refonte Learning",
-    "Annonymous"
+    "Annonymous",
+    "IT Service"
   ]
 }
