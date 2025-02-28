@@ -438,7 +438,7 @@ const fillAndApply = async () => {
 
     if (currentPage < maxPagination) {
       await clickElement(
-        `ul[class="artdeco-pagination__pages artdeco-pagination__pages--number"]>li:nth-child(${
+        `ul[class="jobs-search-pagination__pages"]>li:nth-child(${
           currentPage + 1
         })`
       );

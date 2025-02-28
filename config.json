@@ -25,14 +25,11 @@
   "avoidJobTitles": [
     "TEST",
     "EMBEDDED",
-    "PRINCIPAL",
     "CHIEF",
-    "STAFF",
     "MANAGER",
     "C++",
     "SHAREPOINT",
     "SHARE POINT",
-    "LEAD",
     "ARCHITECT",
     "CLEARANCE",
     "USC",
@@ -41,7 +38,6 @@
     "TSSCI",
     "POLY",
     "TOP",
-    "NET",
     "LOCAL",
     "CITIZEN",
     "CITIZENSHIP",
@@ -55,6 +51,8 @@
     "RLS Associates",
     "Refonte Learning",
     "Annonymous",
-    "IT Service"
+    "IT Service",
+    "CyberCoders",
+    "Stealth"
   ]
 }
